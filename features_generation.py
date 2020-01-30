@@ -9,29 +9,30 @@ file_dir = dir + mol2_dirlist[0]
 
 mol = load_atom(file_dir)  # a dictionary contains molecules information and all atom's information
 
-"""run a simple code to find all atom types"""
+"""compute index map with all atom types from all mol2 files"""
+def index_map(dir):
+    """
 
-
-def find_all_atom_types(dir):
+    :param dir: the directory contains all mol2 files
+    :return:  the index map
+    """
     dirlist = os.listdir(dir)
+    mol2_dirlist= [item for item in dirlist if item[-4:] == 'mol2']
     all_atom_types = []
-    for file_dir in dirlist:
-        if file_dir != '.DS_Store':
-            mol = load_atom(dir + file_dir)
+    for file_dir in mol2_dirlist:
+        mol = load_atom(dir + file_dir)
+        for atom in mol['mol_info'].atom_list:
+            if atom not in all_atom_types:
+               all_atom_types.append(atom)
+    print("atoms include are", all_atom_types)
+    index_map = {}
+    i = 0
+    for atom in sorted(all_atom_types):
+        index_map[atom] = i
+        i += 1
+    return index_map
 
-            for atom in mol['mol_info'].atom_list:
-                if atom not in all_atom_types:
-                    all_atom_types.append(atom)
-    return all_atom_types
-
-
-all_atom_types = find_all_atom_types(dir)
-print("atoms include are", all_atom_types)
-index_map = {'C': 0,
-             'O': 1,
-             'H': 2,
-             'N': 3,
-             'S': 4}
+index_map = index_map(dir)
 L = 3
 cat_dim = 5
 deg_sig = 2
