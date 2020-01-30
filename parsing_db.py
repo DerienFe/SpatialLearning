@@ -1,4 +1,4 @@
-#PARSING DATABASE
+# PARSING DATABASE
 import os
 import numpy as np
 
@@ -12,7 +12,7 @@ print(coordinate_data)
 
 
 from mpl_toolkits import mplot3d
-#%matplotlib inline
+# %matplotlib inline
 import matplotlib.pyplot as plt
 
 
@@ -30,12 +30,12 @@ zdata = coordinate_data[1:, 2]
 
 L = np.shape(xdata)[0]
 
-#import networkx, random
-#adjacent_matrix =  np.random.randint(2, size=(L, L))
-#s = np.random.binomial(L, 0.005, L*L)
-#print(s)
-#adjacent_matrix = s.reshape((L,L))
-#print('ajacent_matrix = {}'.format(adjacent_matrix))
+# import networkx, random
+# adjacent_matrix =  np.random.randint(2, size=(L, L))
+# s = np.random.binomial(L, 0.005, L*L)
+# print(s)
+# adjacent_matrix = s.reshape((L,L))
+# print('ajacent_matrix = {}'.format(adjacent_matrix))
 
 adjacent_matrix = np.zeros((L, L))
 for i in range(L):
