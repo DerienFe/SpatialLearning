@@ -2,6 +2,7 @@ import numpy as np
 import esig.tosig as ts
 import copy
 from load_mol2_data import *
+from load_6angstroms_data import *
 def get_paths(node_index, adjacent_matrix, L):
     """
     function: compute all the integer encoded paths in the substructure around the atom with in radius L
@@ -171,7 +172,7 @@ def coordinate_path_sig(node_index,mol,adjacent_matrix,L,sig_deg,flag):
         return log_signatures
 
 """compute signature feature a molecular level"""
-def mol_features(file_dir, index_map,adjacent_matrix, L, cat_dim, deg_sig):
+def mol_features(file_dir, index_map, L, cat_dim, deg_sig):
     """
 
     :param file_dir: the location of the mol2 file
@@ -198,6 +199,39 @@ def mol_features(file_dir, index_map,adjacent_matrix, L, cat_dim, deg_sig):
         expected_xyz_logsig.append(np.average(xyz_logsig, 0))
     mol_features = {'expected_cat_sig': np.array(expected_cat_sig), 'expected_cat_logsig': np.array(expected_cat_logsig),
                     'expected_xyz_sig': np.array(expected_xyz_sig), 'expected_xyz_logsig': np.array(expected_xyz_logsig)}
+    return mol_features
+
+def mol_KdKi_features(file_dir, index_map, L, cat_dim, deg_sig,flag):
+    """
+
+    :param file_dir: the location of the mol2 file
+    :param index_map: predefinded index map between different atom types and indices
+    :param L: length of the path
+    :param cat_dim: number of categories corresponding to number of different atom types
+    :param deg_sig: degree of signatures
+    :return:
+    """
+    mol = load_KdKi_data(file_dir)
+    adjacent_matrix = load_KdKi_adj(file_dir, mol)
+    expected_cat_sig = []
+    expected_cat_logsig = []
+    expected_xyz_sig = []
+    expected_xyz_logsig = []
+    for node_index in range(mol['mol_info'].num_atoms):
+        if flag=='sig':
+          cat_sig = categorical_path_sig(node_index, mol, adjacent_matrix, index_map, L, cat_dim, deg_sig, flag=0)
+          xyz_sig = coordinate_path_sig(node_index, mol, adjacent_matrix, L, deg_sig, flag=0)
+          expected_cat_sig.append(np.average(cat_sig, 0))
+          expected_xyz_sig.append(np.average(xyz_sig, 0))
+          mol_features = {'expected_cat_sig': np.array(expected_cat_sig),
+                          'expected_xyz_sig': np.array(expected_xyz_sig),}
+        elif flag=='logsig':
+           cat_logsig = categorical_path_sig(node_index, mol, adjacent_matrix, index_map, L, cat_dim, deg_sig, flag=1)
+           xyz_logsig = coordinate_path_sig(node_index, mol, adjacent_matrix, L, deg_sig, flag=1)
+           expected_cat_logsig.append(np.average(cat_logsig, 0))
+           expected_xyz_logsig.append(np.average(xyz_logsig, 0))
+           mol_features = {'expected_cat_logsig': np.array(expected_cat_logsig),
+                           'expected_xyz_logsig': np.array(expected_xyz_logsig)}
     return mol_features
 if __name__ == '__main__':
     """example to compute signature features from PDB file with assigned adjacent matrix"""

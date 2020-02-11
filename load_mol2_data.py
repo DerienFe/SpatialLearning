@@ -1,6 +1,6 @@
 import numpy as np
 from molecule_lib import Node,Mol
-
+import os
 
 """read mol2 file and parse data"""
 
@@ -54,3 +54,25 @@ def get_3D_coordinates(ligand):
         x_y_z = i.features.reshape([1, 3])
         coordinate_data = np.concatenate([coordinate_data, x_y_z], 0)
     return coordinate_data
+
+def index_map(dir):
+    """
+
+    :param dir: the directory contains all mol2 files
+    :return:  the index map
+    """
+    dirlist = os.listdir(dir)
+    mol2_dirlist= [item for item in dirlist if item[-4:] == 'mol2']
+    all_atom_types = []
+    for file_dir in mol2_dirlist:
+        mol = load_atom(dir + file_dir)
+        for atom in mol['mol_info'].atom_list:
+            if atom not in all_atom_types:
+               all_atom_types.append(atom)
+    print("atoms include are", all_atom_types)
+    index_map = {}
+    i = 0
+    for atom in sorted(all_atom_types):
+        index_map[atom] = i
+        i += 1
+    return index_map

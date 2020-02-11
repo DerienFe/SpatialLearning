@@ -68,7 +68,8 @@ class Node(object):
         return self._neighbors
 
 class Mol(object):
-    __slots__ = ['num_atoms', 'atom_list']
-    def __init__(self,num_atoms,atom_list):
+    __slots__ = ['num_atoms', 'atom_list','activity']
+    def __init__(self,num_atoms,atom_list,activity):
         self.num_atoms=num_atoms
         self.atom_list=atom_list
+        self.activity=activity
