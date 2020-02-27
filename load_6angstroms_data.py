@@ -25,6 +25,7 @@ def load_KdKi_data(db_dir):
         atoms.append(node1)
         if atom_type not in atom_list:
             atom_list.append(atom_type)
+    ''''       
     for line in PRT_list:
         atom_type = line[-1]
         x_y_z = np.asarray(line[4:7], float)
@@ -41,6 +42,7 @@ def load_KdKi_data(db_dir):
         atoms.append(node1)
         if atom_type not in atom_list:
             atom_list.append(atom_type)
+    '''
     mol_info = Mol(idx, atom_list, activity)
     mol = {'mol_info': mol_info, 'atoms': atoms}
     return mol
@@ -57,6 +59,21 @@ def load_KdKi_adj(db_dir,mol):
     for line in interaction:
         adjacent_matrix[int(line[1])-1,int(line[2])-1] = 1
         adjacent_matrix[int(line[2])-1, int(line[1])-1] = 1
+    return adjacent_matrix
+
+
+def load_KdKi_ligand_adj(db_dir,mol):
+    current = open(db_dir, "r")
+    data_file = []
+    for row in current:
+        line = row.split()
+        data_file.append(line)
+    interaction=[item for item in data_file if item[:1] == ['INT']]
+    adjacent_matrix = np.zeros([mol['mol_info'].num_atoms, mol['mol_info'].num_atoms])
+    for line in interaction:
+        if int(line[1])<=mol['mol_info'].num_atoms and int(line[2])<=mol['mol_info'].num_atoms:
+           adjacent_matrix[int(line[1])-1,int(line[2])-1] = 1
+           adjacent_matrix[int(line[2])-1, int(line[1])-1] = 1
     return adjacent_matrix
 
 def index_KdKi_map(dir):
