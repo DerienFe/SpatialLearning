@@ -209,14 +209,15 @@ if __name__ == '__main__':
     kf = KFold(n_splits=5)
     sp_cor=[]
     rsq_score=[]
-    for train, test in kf.split(features):
-        print("%s %s" % (train, test))
+    for train_idx, test_idx in kf.split(features):
+        #print("%s %s" % (train, test))
         X_train, X_test,adj_train,adj_test,length_train,length_test, y_train, y_test = \
-            features[train], features[test],adj[train],adj[test],length[train],length[test], activity[train], activity[test]
+            features[train_idx], features[test_idx],adj[train_idx],adj[test_idx],length[train_idx],\
+            length[test_idx], activity[train_idx], activity[test_idx]
         if torch.cuda.is_available():
-            GCN_model = GCN(nfeat=4, nhid1=100, nhid2=50, dropout=0.1).to(device)
+            GCN_model = GCN(nfeat=13, nhid1=100, nhid2=50, dropout=0.1).to(device)
         else:
-            GCN_model = GCN(nfeat=4, nhid1=100, nhid2=50, dropout=0.1)
+            GCN_model = GCN(nfeat=13, nhid1=100, nhid2=50, dropout=0.1)
         print(GCN)
 
         """check which parameter is not on gpu"""
