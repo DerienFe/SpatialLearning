@@ -6,7 +6,7 @@ from signature_feature import *
 '''
 dir = "mol2 structures/"
 dirlist = os.listdir(dir)
-mol2_dirlist = [item for item in dirlist if item[-4:] == '.mol2']
+mol2_dirlist = [item for item in dirlist if item[-5:] == '.mol2']
 file_dir = dir + mol2_dirlist[0]
 
 mol = load_atom(file_dir)  # a dictionary contains molecules information and all atom's information
@@ -47,6 +47,7 @@ print(mol_features['expected_xyz_logsig'].shape)
 '''
 
 """load Kd data"""
+'''
 from load_6angstroms_data import *
 dir = "6 Angstroms/database_Kd_6A/"
 dirlist = os.listdir(dir)
@@ -67,7 +68,8 @@ for i in range(len(dirlist)):
     file_dir = dir + dirlist[i]
     mol_features = mol_KdKi_features(file_dir, index_map, L, cat_dim, deg_sig, 'sig')
     features.append(np.concatenate([mol_features['expected_cat_sig'],mol_features['expected_xyz_sig']],axis=1))
-
+'''
+'''
 dir = "6 Angstroms/database_Kd_6A/"
 dirlist = os.listdir(dir)
 dirlist = [item for item in dirlist if item[-4:] == '.txt']
@@ -77,24 +79,12 @@ activity=[]
 for i in range(len(dirlist)):
     print(i)
     file_dir = dir + dirlist[i]
-    mol = load_KdKi_data(file_dir)
+    mol = load_KdKi_ligand_data(file_dir)
     len_list.append(mol['mol_info'].num_atoms)
     adj_list.append(load_KdKi_adj(file_dir, mol))
     activity.append(mol['mol_info'].activity)
 
-def padding_zeros(feature_list,adj_list,len_list):
-    max_len=max(len_list)
-    pad_features=np.zeros([max_len,feature_list[0].shape[1]])
-    pad_feature_list=[]
-    pad_adj=np.zeros([max_len,max_len])
-    pad_adj_list=[]
-    for i in range(len(len_list)):
-        print(i)
-        pad_features[:len_list[i],:]=feature_list[i]
-        pad_feature_list.append(pad_features)
-        pad_adj[:len_list[i],:len_list[i]]=adj_list[i]
-        pad_adj_list.append(pad_adj)
-    return np.array(pad_feature_list),np.array(pad_adj_list)
+
 
 features_mat,adj_mat=padding_zeros(features,adj_list,len_list)
 
@@ -105,26 +95,56 @@ np.save('activity.npy',activity)
 features_1=np.load(features.npy)
 
 
-
+'''
 
 
 '''compute original features, xyz data and one hot encoded atom type information'''
+from load_6angstroms_data import *
+dir = "database_10angstroms/"
+dirlist = os.listdir(dir)
+dirlist = [item for item in dirlist if item[-4:] == '.txt']
+
+
 index_map = index_KdKi_map(dir)
 from sklearn import preprocessing
-le = preprocessing.LabelEncoder()
-le.fit(list(index_map.keys()))
+le = preprocessing.OneHotEncoder()
+le.fit(np.array(list(index_map.keys())).reshape([10,1]))
 original_features=[]
+adj_list=[]
+len_list=[]
+activity=[]
+num_atoms=[]
+for i in range(len(dirlist)):
+    print(i)
+    file_dir = dir + dirlist[i]
+    mol = load_KdKi_data(file_dir)
+    len_list.append(mol['mol_info'].num_atoms)
+    adj_list.append(load_KdKi_ligand_adj(file_dir, mol))
+    activity.append(mol['mol_info'].activity)
 for i in range(len(dirlist)):
     print(i)
     file_dir = dir + dirlist[i]
     mol = load_KdKi_data(file_dir)
     temp=[]
     for j in range(mol['mol_info'].num_atoms):
-        temp.append(np.concatenate([mol['atoms'][j].features,le.transform([mol['atoms'][j].ntype])]))
+        temp.append(np.concatenate([mol['atoms'][j].features,le.transform([[mol['atoms'][j].ntype]]).toarray().flatten]))
     original_features.append(np.array(temp))
-original_features1=np.array(original_features)
-np.save('ori_features.npy',np.array(original_features))
-original_features1=np.load('ori_features.npy')
+
+
+def padding_zeros(feature_list,adj_list,len_list):
+    max_len=max(len_list)
+    pad_feature_list=[]
+    pad_adj_list=[]
+    for i in range(len(len_list)):
+        print(i)
+        pad_features = np.zeros([max_len, feature_list[0].shape[1]])
+        pad_adj = np.zeros([max_len, max_len])
+        pad_features[:len_list[i],:]=feature_list[i]
+        pad_feature_list.append(pad_features)
+        pad_adj[:len_list[i],:len_list[i]]=adj_list[i]
+        pad_adj_list.append(pad_adj)
+    return np.array(pad_feature_list),np.array(pad_adj_list)
+
 
 def padding_zeros1(feature_list,len_list):
     max_len=max(len_list)
@@ -139,7 +159,11 @@ def padding_zeros1(feature_list,len_list):
 
     return np.array(pad_feature_list)
 
+features_mat,adj_mat=padding_zeros(original_features,adj_list,len_list)
 input_features=padding_zeros1(original_features,len_list)
-np.save('original_features.npy',input_features)
+np.save('ligand_features.npy',features_mat)
+np.save('ligand_adj.npy',adj_mat)
+np.save('full_length.npy',np.array(len_list))
+np.save('full_activity.npy',np.array(activity))
 original_features1=np.load('original_features.npy')
 input_features.shape
