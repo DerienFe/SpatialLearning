@@ -127,7 +127,7 @@ for i in range(len(dirlist)):
     mol = load_KdKi_data(file_dir)
     temp=[]
     for j in range(mol['mol_info'].num_atoms):
-        temp.append(np.concatenate([mol['atoms'][j].features,le.transform([[mol['atoms'][j].ntype]]).toarray().flatten]))
+        temp.append(np.concatenate([mol['atoms'][j].features,le.transform([[mol['atoms'][j].ntype]]).toarray().flatten()]))
     original_features.append(np.array(temp))
 
 
