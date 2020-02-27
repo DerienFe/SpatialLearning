@@ -100,15 +100,15 @@ features_1=np.load(features.npy)
 
 '''compute original features, xyz data and one hot encoded atom type information'''
 from load_6angstroms_data import *
-dir = "6 Angstroms/database_Ki_6A/"
+dir = "database_10angstroms/"
 dirlist = os.listdir(dir)
 dirlist = [item for item in dirlist if item[-4:] == '.txt']
 
 
 index_map = index_KdKi_map(dir)
 from sklearn import preprocessing
-le = preprocessing.LabelEncoder()
-le.fit(list(index_map.keys()))
+le = preprocessing.OneHotEncoder()
+le.fit(np.array(list(index_map.keys())).reshape([10,1]))
 original_features=[]
 adj_list=[]
 len_list=[]
@@ -127,20 +127,18 @@ for i in range(len(dirlist)):
     mol = load_KdKi_data(file_dir)
     temp=[]
     for j in range(mol['mol_info'].num_atoms):
-        temp.append(np.concatenate([mol['atoms'][j].features,le.transform([mol['atoms'][j].ntype])]))
+        temp.append(np.concatenate([mol['atoms'][j].features,le.transform([[mol['atoms'][j].ntype]]).toarray().flatten()]))
     original_features.append(np.array(temp))
-original_features1=np.array(original_features)
-np.save('ori_features.npy',np.array(original_features))
-original_features1=np.load('ori_features.npy')
+
 
 def padding_zeros(feature_list,adj_list,len_list):
     max_len=max(len_list)
-    pad_features=np.zeros([max_len,feature_list[0].shape[1]])
     pad_feature_list=[]
-    pad_adj=np.zeros([max_len,max_len])
     pad_adj_list=[]
     for i in range(len(len_list)):
         print(i)
+        pad_features = np.zeros([max_len, feature_list[0].shape[1]])
+        pad_adj = np.zeros([max_len, max_len])
         pad_features[:len_list[i],:]=feature_list[i]
         pad_feature_list.append(pad_features)
         pad_adj[:len_list[i],:len_list[i]]=adj_list[i]
@@ -163,9 +161,9 @@ def padding_zeros1(feature_list,len_list):
 
 features_mat,adj_mat=padding_zeros(original_features,adj_list,len_list)
 input_features=padding_zeros1(original_features,len_list)
-np.save('ki_ligand_features.npy',features_mat)
-np.save('ki_ligand_adj.npy',adj_mat)
-np.save('ki_length.npy',np.array(len_list))
-np.save('ki_activity.npy',activity)
+np.save('ligand_features.npy',features_mat)
+np.save('ligand_adj.npy',adj_mat)
+np.save('full_length.npy',np.array(len_list))
+np.save('full_activity.npy',np.array(activity))
 original_features1=np.load('original_features.npy')
 input_features.shape
